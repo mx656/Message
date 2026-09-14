@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Consent-Based Notification Demo</title>
+</head>
+<body>
+  <h1>Notification Demo</h1>
+  <p id="status">Notifications are off.</p>
+
+  <button id="enable">Enable notifications</button>
+  <button id="notify">Send one test notification</button>
+  <button id="disable">Disable in this page</button>
+
+  <script>
+    let enabled = false;
+
+    const status = document.getElementById("status");
+    const enableBtn = document.getElementById("enable");
+    const notifyBtn = document.getElementById("notify");
+    const disableBtn = document.getElementById("disable");
+
+    enableBtn.addEventListener("click", async () => {
+      if (!("Notification" in window)) {
+        status.textContent = "This browser does not support notifications.";
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      enabled = permission === "granted";
+
+      status.textContent = enabled
+        ? "Notifications enabled. You can send one test notification."
+        : "Notification permission was not granted.";
+    });
+
+    notifyBtn.addEventListener("click", () => {
+      if (!enabled || Notification.permission !== "granted") {
+        status.textContent = "Please enable notifications first.";
+        return;
+      }
+
+      // Send exactly one notification per click. No loops, no repeats.
+      new Notification("Test notification", {
+        body: "This is a single, user-triggered notification.",
+        tag: "single-test" // helps prevent duplicate stacking
+      });
+
+      status.textContent = "Sent one test notification.";
+    });
+
+    disableBtn.addEventListener("click", () => {
+      enabled = false;
+      status.textContent = "Disabled for this page. You can also revoke permission in browser settings.";
+    });
+  </script>
+</body>
+</html>
